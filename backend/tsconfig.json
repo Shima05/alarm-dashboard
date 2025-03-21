@@ -1,0 +1,19 @@
+{
+  "compilerOptions": {
+    "lib": ["es2023"],
+    "module": "nodenext",
+    "target": "es2022",
+    "strict": true,
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "moduleResolution": "nodenext",
+    "forceConsistentCasingInFileNames": true,
+    "noUncheckedIndexedAccess": true,
+    "outDir": "./dist",
+    "allowImportingTsExtensions": true,
+    "noEmit": true,
+    "rootDir": "./"
+  },
+  "include": ["src/**/*", "tests/**/*"],
+  "exclude": ["dist"]
+}

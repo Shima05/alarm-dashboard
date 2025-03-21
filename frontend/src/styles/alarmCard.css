@@ -1,0 +1,79 @@
+/* General styles */
+body {
+  font-family: "Arial", sans-serif;
+  background-color: #f4f4f4;
+  margin: 0;
+  padding: 0;
+}
+
+.alarm-detail-container {
+  max-width: 1200px;
+  margin: 50px auto;
+  padding: 20px;
+}
+
+.card {
+  background: white;
+  padding: 20px;
+  border-radius: 10px;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+  margin-bottom: 20px;
+}
+
+.alarm-title {
+  font-size: 24px;
+  font-weight: bold;
+  margin-bottom: 15px;
+  color: #333;
+}
+
+.alarm-info {
+  font-size: 18px;
+  color: #555;
+  margin-bottom: 20px;
+}
+
+.alarm-info p {
+  margin: 5px 0;
+}
+
+.image-gallery {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 20px;
+}
+
+.alarm-image {
+  width: 200px;
+  height: 200px;
+  object-fit: cover;
+  border-radius: 10px;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+.error {
+  color: red;
+  font-size: 18px;
+  margin-top: 20px;
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+  .card {
+    padding: 15px;
+  }
+
+  .alarm-title {
+    font-size: 20px;
+  }
+
+  .alarm-info {
+    font-size: 16px;
+  }
+
+  .alarm-image {
+    width: 100px;
+    height: 100px;
+  }
+}

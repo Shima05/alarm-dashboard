@@ -1,0 +1,351 @@
+openapi: 3.0.0
+info:
+  title: Alarm Management API
+  version: 1.0.0
+  description: A simple API for managing alarms triggered by sensors.
+servers:
+  - url: http://localhost:5001
+    description: Local development server
+security:
+  - BearerAuth: []
+components:
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+paths:
+  /api/alarms:
+    post:
+      summary: Add a new alarm
+      description: Sensors can send alarms to the API with a UUID, sensor, and type.
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                uuid:
+                  type: string
+                  format: uuid
+                  description: Unique identifier for the alarm.
+                sensor:
+                  type: string
+                  description: The name of the sensor that triggered the alarm.
+                type:
+                  type: string
+                  description: The type of alarm (e.g., "motion", "temperature").
+              required:
+                - uuid
+                - sensor
+                - type
+      responses:
+        '201':
+          description: Alarm created successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  uuid:
+                    type: string
+                    format: uuid
+                  sensor:
+                    type: string
+                  timestamp:
+                    type: integer
+                  type:
+                    type: string
+                  visualizations:
+                    type: array
+                    items:
+                      type: string
+                      format: uri
+                      description: URL or path of the image.
+        '400':
+          description: Invalid request, missing required fields or malformed data
+        '401':
+          description: Invalid or expired token
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: 'Invalid or expired token'
+        '403':
+          description: Authorization token required
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: 'Authorization token required'
+
+    get:
+      summary: List alarms
+      description: Retrieve a paginated list of alarms, optionally filtering by sensor or type.
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: sensor
+          in: query
+          schema:
+            type: string
+          description: Filter alarms by sensor name.
+        - name: type
+          in: query
+          schema:
+            type: string
+          description: Filter alarms by alarm type.
+        - name: page
+          in: query
+          schema:
+            type: integer
+            default: 1
+          description: The page number of the results.
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 10
+          description: Number of alarms to return per page.
+      responses:
+        '200':
+          description: A paginated list of alarms
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    uuid:
+                      type: string
+                      format: uuid
+                    timestamp:
+                      type: integer
+                    type:
+                      type: string
+                    sensor:
+                      type: string
+                    visualizations:
+                      type: array
+                      items:
+                        type: string
+                        description: URL or path of the image.
+        '400':
+          description: Invalid query parameters or missing parameters
+        '401':
+          description: Invalid or expired token
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: 'Invalid or expired token'
+        '403':
+          description: Authorization token required
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: 'Authorization token required'
+
+  /api/alarms/{id}:
+    get:
+      summary: Get alarm details by ID
+      description: Retrieve detailed information about a specific alarm by its UUID.
+      security:
+        - BearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+            format: uuid
+          description: The unique identifier of the alarm.
+      responses:
+        '200':
+          description: The details of the requested alarm
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  uuid:
+                    type: string
+                    format: uuid
+                  timestamp:
+                    type: integer
+                  type:
+                    type: string
+                  sensor:
+                    type: string
+                  visualizations:
+                    type: array
+                    items:
+                      type: string
+                      description: URL or path of the image.
+        '404':
+          description: Alarm not found
+        '401':
+          description: Invalid or expired token
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: 'Invalid or expired token'
+        '403':
+          description: Authorization token required
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: 'Authorization token required'
+
+  /api/alarms/{id}/visualizations:
+    post:
+      summary: Upload alarm visualizations
+      description: Upload one or more JPEG images related to an alarm for visual representation.
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+          description: The unique ID of the alarm.
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                files:
+                  type: array
+                  items:
+                    type: string
+                    format: binary
+                  description: The JPEG files to be uploaded as visualizations for the alarm.
+      responses:
+        '201':
+          description: Visualizations uploaded successfully
+        '400':
+          description: Invalid file or request, please check the uploaded files.
+        '404':
+          description: Alarm not found
+        '401':
+          description: Invalid or expired token
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: 'Invalid or expired token'
+        '403':
+          description: Authorization token required
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: 'Authorization token required'
+
+  /api/auth/login:
+    post:
+      summary: User login
+      description: Authenticate a user and return a JWT token.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - username
+                - password
+              properties:
+                username:
+                  type: string
+                  example: johndoe
+                password:
+                  type: string
+                  format: password
+                  example: P@ssw0rd123
+      responses:
+        '200':
+          description: Login successful, returns a JWT token
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  token:
+                    type: string
+                    example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MTIzNDU2Nzg5MCwiZXhwIjoxNjYwNzI1NzYwfQ.S0meRand0mT0kenStr1ng
+        '401':
+          description: Unauthorized, invalid credentials
+        '500':
+          description: Internal server error
+
+  /api/auth/signup:
+    post:
+      summary: Sign up a user
+      description: Register a new user and return a JWT token for authentication.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - username
+                - password
+              properties:
+                username:
+                  type: string
+                  description: The desired username for the new user.
+                password:
+                  type: string
+                  description: The password for the new user.
+      responses:
+        '200':
+          description: User successfully registered; returns a JWT token for authentication.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  token:
+                    type: string
+                    description: A JWT token to authenticate subsequent requests.
+        '400':
+          description: Invalid request; the provided data is incomplete or malformed.
+        '500':
+          description: Internal server error; an unexpected error occurred during the registration process.

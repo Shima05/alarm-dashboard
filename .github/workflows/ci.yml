@@ -1,0 +1,73 @@
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  # Backend Job
+  backend:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Set up Node.js from .nvmrc
+        uses: actions/setup-node@v3
+        with:
+          node-version-file: .nvmrc
+
+      - name: Install backend dependencies
+        working-directory: ./backend
+        run: |
+          npm install
+
+      - name: Rename .env.template to .env
+        working-directory: ./backend
+        run: |
+          cp .env.template .env
+
+      - name: Run backend tests
+        working-directory: ./backend
+        run: |
+          npm run test
+
+  # Frontend Job
+  frontend:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Set up Node.js from .nvmrc
+        uses: actions/setup-node@v3
+        with:
+          node-version-file: .nvmrc
+
+      - name: Install frontend dependencies
+        working-directory: ./frontend
+        run: |
+          npm install
+
+      - name: Run frontend unit tests
+        working-directory: ./frontend
+        run: |
+          npm run test
+
+      - name: Start frontend server in background
+        working-directory: ./frontend
+        run: |
+          npm install -g wait-on
+          npm run dev &
+          wait-on http://localhost:5173
+        env:
+          CI: true
+
+      - name: Run Cypress E2E tests
+        working-directory: ./frontend
+        run: |
+          npx cypress run
